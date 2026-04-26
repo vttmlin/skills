@@ -48,13 +48,13 @@ databases:
 ### List configured databases
 
 ```bash
-mysql-tool list
+mysql-cli list
 ```
 
 ### Execute a query
 
 ```bash
-mysql-tool query -d <database_name> -q "SELECT * FROM users LIMIT 10"
+mysql-cli query -d <database_name> -q "SELECT * FROM users LIMIT 10"
 ```
 
 ### Output format
