@@ -1,8 +1,8 @@
 {
     "name": "anthropic-agent-skills",
     "owner": {
-        "name": "Keith Lazuka",
-        "email": "klazuka@anthropic.com"
+        "name": "vttmlin",
+        "email": ""
     },
     "metadata": {
         "description": "Anthropic example skills",

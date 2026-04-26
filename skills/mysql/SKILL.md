@@ -24,7 +24,7 @@ This skill provides a MySQL CLI tool that automatically establishes SSH tunnels 
 
 ### Configuration
 
-Create `~/.skills/vttmlin/mysql/{md5}/config.yml`:
+Create `~/.skills/vttmlin/mysql/{md5}/config.yml` where `{md5}` is the MD5 hash of the skill directory path:
 
 ```yaml
 databases:
@@ -87,7 +87,3 @@ All output is JSON:
 | `list` | List all configured databases |
 | `query -d <db> -q <sql>` | Execute SQL query |
 | `version` | Show version info |
-
-## Auto-download
-
-The skill automatically downloads the latest release binary from GitHub on first use.
