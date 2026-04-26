@@ -1,0 +1,28 @@
+databases:
+  mydb:
+    database:
+      host: "127.0.0.1"
+      port: 3306
+      user: "readonly_user"
+      password: "password123"
+      name: "mydb"
+    ssh:
+      enabled: true
+      host: "bastion.example.com"
+      user: "jump"
+      key_path: "~/.ssh/id_rsa"
+      local_port: 13306
+
+  production:
+    database:
+      host: "db.prod.internal"
+      port: 3306
+      user: "readonly_user"
+      password: "prod_password"
+      name: "production_db"
+    ssh:
+      enabled: true
+      host: "bastion.prod.example.com"
+      user: "prod-jump"
+      key_path: "~/.ssh/id_rsa"
+      local_port: 13307
