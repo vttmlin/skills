@@ -1,6 +1,6 @@
 .PHONY: help link-mysql unlink-mysql
 
-SKILLS_CLI_DIR := /Users/vttmlin/workspace/part-time/skills/skills-cli
+SKILLS_CLI_DIR ?= ../skills-cli
 SKILLS_MYSQL_DIR := skills/mysql
 MYSQL_BIN := $(SKILLS_CLI_DIR)/bin/mysql
 

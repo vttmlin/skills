@@ -3,137 +3,119 @@ name: mysql
 description: |
   MySQL CLI tool with SSH tunnel support. Use when you need to:
   - Connect to MySQL database through SSH tunnel
-  - Execute read-only SQL queries
+  - Execute SQL queries with JSON output
   - Manage multiple database configurations
-  - Query databases with JSON output
+  - Open interactive MySQL shell
 
   Triggers: "mysql", "MySQL", "database query", "ssh tunnel mysql", "connect to mysql", "mysql-cli"
 ---
 
 ## Overview
 
-This skill provides a MySQL CLI tool that automatically establishes SSH tunnels for secure database connections and executes queries in read-only mode.
+MySQL CLI tool that connects to MySQL databases via local `mysql` client binary. Supports SSH tunnel for secure connections through bastion hosts. All output is JSON. Every execution is logged.
 
 ## Setup
 
 ### Prerequisites
 
-- SSH access to bastion host (if using SSH tunnel)
-- SSH key-based authentication configured
+- `mysql` client installed and accessible in PATH
+- SSH key-based authentication configured (if using SSH tunnel)
 
-### Step 1: Locate the mysql-cli binary
+### Binary
 
-The binary is located at:
 ```
-/Users/vttmlin/workspace/part-time/skills/skills-cli/bin/mysql/mysql-cli-darwin-arm64
-```
-
-Available binaries:
-- `mysql-cli-darwin-arm64` - macOS Apple Silicon
-- `mysql-cli-darwin-amd64` - macOS Intel
-- `mysql-cli-linux-arm64` - Linux ARM64
-- `mysql-cli-linux-amd64` - Linux x86_64
-
-### Step 2: Configure databases
-
-#### Config path
-
-```bash
-# Skill directory: /Users/vttmlin/workspace/part-time/skills/skills/skills/mysql
-# MD5: 083b3499dbb89f8e87bd69448d33178a
-
-# Config path: ~/.skills/vttmlin/skills/mysql/083b3499dbb89f8e87bd69448d33178a/config.yml
-mkdir -p ~/.skills/vttmlin/skills/mysql/083b3499dbb89f8e87bd69448d33178a
+./scripts/mysql-cli-{os}-{arch}
 ```
 
-#### Config file format (NESTED structure)
+| Platform | Binary |
+|----------|--------|
+| macOS Apple Silicon | `mysql-cli-darwin-arm64` |
+| macOS Intel | `mysql-cli-darwin-amd64` |
+| Linux ARM64 | `mysql-cli-linux-arm64` |
+| Linux x86_64 | `mysql-cli-linux-amd64` |
+| Windows | `mysql-cli-windows-amd64.exe` |
 
-**IMPORTANT: This skill uses NESTED YAML structure (database settings under `database:` key)!**
+### Config
+
+Config path is auto-derived from the binary location: `~/.skills/vttmlin/skills/mysql/{md5}/config.yml`
 
 ```yaml
 databases:
-  <connection_name>:
+  <name>:
     database:
       host: <mysql_host>
       port: 3306
       user: <username>
       password: <password>
       name: <database_name>
+      readonly: true        # optional, default false
     ssh:
       enabled: <true|false>
-      host: <bastion_host>     # only if ssh enabled
-      user: <ssh_user>         # only if ssh enabled
-      key_path: <path_to_key>  # only if ssh enabled
-      local_port: <port>        # only if ssh enabled
+      host: <bastion_host>
+      port: 22               # optional, default 22
+      user: <ssh_user>
+      key_path: <path_to_key>  # optional
+      local_port: <port>        # optional, auto-assign if omitted
+      ssh_config_host: <host>  # optional, read from ~/.ssh/config
 ```
 
-### Configuration Examples
+`ssh_config_host`: When set, reads HostName/User/Port/IdentityFile from `~/.ssh/config` for that host. Config-level values take precedence over SSH config values.
 
-**Example 1: Direct connection (no SSH tunnel)**
-```yaml
-databases:
-  OmniClick:
-    database:
-      host: 192.168.192.32
-      port: 3306
-      user: root
-      password: Yxx521125.
-      name: OmniClick
-    ssh:
-      enabled: false
-```
+### Environment Variables
 
-**Example 2: Connection via SSH tunnel**
-```yaml
-databases:
-  production:
-    database:
-      host: 127.0.0.1
-      port: 3306
-      user: readonly_user
-      password: prod_pass
-      name: production_db
-    ssh:
-      enabled: true
-      host: bastion.example.com
-      user: jump
-      key_path: ~/.ssh/id_rsa
-      local_port: 13306
-```
+| Variable | Description |
+|----------|-------------|
+| `MYSQL_SKILL_DIR` | Override SKILL.md directory resolution (for development) |
+
+### Logs
+
+Logs are written to `~/.skills/vttmlin/skills/mysql/{md5}/logs/YYYY-MM-DD.log`. Every command execution and SQL statement is logged.
 
 ## Usage
 
-### List configured databases
+### List databases
 
 ```bash
-/Users/vttmlin/workspace/part-time/skills/skills-cli/bin/mysql/mysql-cli-darwin-arm64 list
+./scripts/mysql-cli-darwin-arm64 list
 ```
 
 ### Execute a query
 
 ```bash
-/Users/vttmlin/workspace/part-time/skills/skills-cli/bin/mysql/mysql-cli-darwin-arm64 query -d <connection_name> -q "SELECT * FROM users LIMIT 10"
+./scripts/mysql-cli-darwin-arm64 query -d <name> -q "SELECT * FROM users LIMIT 10"
 ```
 
-### Output format
+### Open interactive shell
 
-All output is JSON:
+```bash
+./scripts/mysql-cli-darwin-arm64 connect -d <name>
+```
+
+### Show version
+
+```bash
+./scripts/mysql-cli-darwin-arm64 version
+```
+
+## Output
+
+### Success
 
 ```json
 {
-  "columns": ["id", "name", "email"],
+  "columns": ["id", "name"],
   "rows": [
-    [1, "John", "john@example.com"],
-    [2, "Jane", "jane@example.com"]
+    [1, "Alice"],
+    [2, "Bob"]
   ]
 }
 ```
 
-### Error format
+### Error
 
 ```json
 {
-  "error": "database not found",
+  "error": "database not found, available: [OmniClick, diyring]",
   "code": 1
 }
 ```
@@ -142,16 +124,20 @@ All output is JSON:
 
 | Command | Description |
 |---------|-------------|
-| `list` | List all configured databases |
-| `query -d <db> -q <sql>` | Execute SQL query |
+| `list` | List all configured database names |
+| `query -d <name> -q <sql>` | Execute SQL query, return JSON results |
+| `connect -d <name>` | Open interactive MySQL shell |
 | `version` | Show version info |
 
 ## Troubleshooting
 
-**Problem: `database not found`**
-- Verify config is at: `~/.skills/vttmlin/skills/mysql/083b3499dbb89f8e87bd69448d33178a/config.yml`
-- Verify config uses NESTED structure (database settings under `database:` key)
+**`database not found`**
+- Verify config file exists under the correct `{md5}` directory
+- Check that the database name matches the key in config.yml
 
-**Problem: `read-only mode: only SELECT queries are allowed`**
-- The `readonly: true` setting only allows SELECT queries
-- To allow other queries, set `readonly: false` in config (use with caution)
+**`tunnel port not ready: timeout waiting for port`**
+- Verify SSH key and bastion host accessibility
+- Check if the configured `local_port` is already in use
+
+**`read-only mode: only SELECT/SHOW/DESCRIBE/EXPLAIN queries are allowed`**
+- Set `readonly: false` in the database config to allow all queries
