@@ -1,21 +1,28 @@
 {
-    "name": "anthropic-agent-skills",
-    "owner": {
-        "name": "vttmlin",
-        "email": ""
-    },
-    "metadata": {
-        "description": "Anthropic example skills",
-        "version": "1.0.0"
-    },
-    "plugins": [
-        {
-            "description": "Collection of document processing suite including Excel, Word, PowerPoint, and PDF capabilities",
-            "source": "./",
-            "strict": false,
-            "skills": [
-                "./skills/mysql"
-            ]
-        }
-    ]
+  "name": "vttmlin-skills",
+  "owner": {
+    "name": "vttmlin"
+  },
+  "description": "dev-workflow：从 issue 到合并交付的通用开发流程 skill 套件",
+  "plugins": [
+    {
+      "name": "dev-workflow",
+      "source": "./",
+      "description": "issue → 需求 → 开发 → 测试四个阶段的 skill、并行实现代理 dev-agent，以及安装和反馈工具",
+      "version": "1.0.0",
+      "strict": false,
+      "skills": [
+        "./skills/dev-workflow",
+        "./skills/dev-issue",
+        "./skills/dev-requirements",
+        "./skills/dev-implement",
+        "./skills/dev-test",
+        "./skills/dev-install",
+        "./skills/dev-feedback"
+      ],
+      "agents": [
+        "./skills/dev-workflow/agents/dev-agent.md"
+      ]
+    }
+  ]
 }
